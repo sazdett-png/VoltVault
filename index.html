@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет Инструментов - Мой Арсенал</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        industrial: {
+                            900: '#0a0a0a', // Deepest black
+                            800: '#141414', // Very dark grey
+                            700: '#262626', // Border grey
+                            600: '#404040', // Lighter grey for inactive text
+                            milwaukee: '#db0000', // Milwaukee Red
+                            klein: '#f97316', // Klein Orange
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'monospace'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.2s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f3f4f6;
+        }
+        /* Брутальный скроллбар */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141414; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262626; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f97316; 
+        }
+        
+        .input-field {
+            background-color: #0a0a0a;
+            border: 1px solid #262626;
+            color: white;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 1px #f97316;
+        }
+        /* Индикация календаря для темной темы */
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Утилита для скрытия контента аккордеона */
+        .accordion-content {
+            display: none;
+        }
+        .accordion-content.open {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-icon.open {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen py-6 px-4 sm:px-6 lg:px-8 flex justify-center relative">
+
+    <div class="w-full max-w-5xl flex flex-col gap-6">
+        
+        <!-- Шапка -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-industrial-800 p-6 rounded-xl border-l-4 border-industrial-milwaukee shadow-xl gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight uppercase flex items-center gap-3">
+                    <svg class="w-8 h-8 text-industrial-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Мой Арсенал
+                </h1>
+                <p class="text-industrial-600 mt-1 text-sm font-medium">Ежемесячный учет покупок</p>
+            </div>
+            <div class="text-left sm:text-right bg-industrial-900 p-3 rounded-lg border border-industrial-700">
+                <p class="text-xs text-industrial-600 uppercase tracking-wider font-bold mb-1">Всего за все время</p>
+                <p class="text-2xl font-mono font-black text-white" id="grand-total">0.00 CAD</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <!-- Левая колонка: Форма -->
+            <div class="lg:col-span-1 sticky top-6">
+                <div class="bg-industrial-800 p-6 rounded-xl shadow-lg border border-industrial-700">
+                    <h2 class="text-lg font-bold uppercase mb-5 border-b border-industrial-700 pb-3 flex items-center gap-2 text-white">
+                        <svg class="w-5 h-5 text-industrial-klein" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Новая покупка
+                    </h2>
+                    <form id="add-tool-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-name">Название инструмента</label>
+                            <input type="text" id="tool-name" required placeholder="Например: Стриппер Klein" class="w-full px-3 py-2.5 rounded-md input-field text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-price">Цена (CAD)</label>
+                            <input type="number" id="tool-price" required step="0.01" min="0" placeholder="0.00" class="w-full px-3 py-2.5 rounded-md input-field text-sm font-mono font-bold text-industrial-klein">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-date">Дата покупки</label>
+                            <input type="date" id="tool-date" required class="w-full px-3 py-2.5 rounded-md input-field text-sm font-mono [color-scheme:dark]">
+                        </div>
+                        <button type="submit" class="w-full mt-6 bg-industrial-700 hover:bg-industrial-klein hover:border-industrial-klein border border-industrial-600 text-white font-bold py-3 px-4 rounded-md transition-all duration-200 flex justify-center items-center gap-2 uppercase tracking-wide text-sm shadow-md">
+                            Внести в базу
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Правая колонка: Месяцы (Аккордеон) -->
+            <div class="lg:col-span-2">
+                <div class="bg-industrial-800 p-6 rounded-xl shadow-lg border border-industrial-700 min-h-[500px]">
+                    <div class="flex justify-between items-center mb-5 border-b border-industrial-700 pb-3">
+                        <h2 class="text-lg font-bold uppercase flex items-center gap-2 text-white">
+                            <svg class="w-5 h-5 text-industrial-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Архив по месяцам
+                        </h2>
+                    </div>
+                    
+                    <div id="months-container" class="space-y-4">
+                        <!-- Сюда скрипт вставит месяцы -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кастомное модальное окно для подтверждения удаления -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+        <div class="bg-industrial-800 border-t-4 border-industrial-milwaukee p-6 rounded-xl shadow-2xl max-w-sm w-full">
+            <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <svg class="w-6 h-6 text-industrial-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Удаление
+            </h3>
+            <p class="text-gray-300 mb-6 text-sm">Вы действительно хотите удалить этот инструмент из базы? Это действие нельзя отменить.</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 bg-industrial-900 hover:bg-industrial-700 text-white rounded-md text-sm font-medium border border-industrial-700 transition-colors">Отмена</button>
+                <button onclick="confirmDelete()" class="px-4 py-2 bg-industrial-milwaukee hover:bg-red-700 text-white rounded-md text-sm font-bold transition-colors shadow-lg shadow-red-900/50">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'voltvault_tools_local';
+        let tools = [];
+        let openMonths = new Set(); // Хранит ключи открытых месяцев (например '2026-09')
+        let toolToDeleteId = null;
+
+        const form = document.getElementById('add-tool-form');
+        const nameInput = document.getElementById('tool-name');
+        const priceInput = document.getElementById('tool-price');
+        const dateInput = document.getElementById('tool-date');
+        
+        const monthsContainer = document.getElementById('months-container');
+        const grandTotalEl = document.getElementById('grand-total');
+        const modal = document.getElementById('delete-modal');
+
+        const monthNames = [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", 
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ];
+
+        // Загрузка данных
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    tools = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Ошибка парсинга данных", e);
+                    tools = [];
+                }
+            } else {
+                tools = [];
+            }
+            renderUI();
+        }
+
+        // Сохранение данных
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tools));
+            renderUI();
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ru-RU', { 
+                style: 'currency', 
+                currency: 'CAD',
+                minimumFractionDigits: 2
+            }).format(amount);
+        }
+
+        function formatDateStr(dateStr) {
+            const parts = dateStr.split('-');
+            if(parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+            return dateStr;
+        }
+
+        function renderUI() {
+            let grandTotal = 0;
+            const groupedByMonth = {};
+
+            // Группируем инструменты по месяцам
+            tools.forEach(tool => {
+                grandTotal += tool.price;
+                const monthKey = tool.date.substring(0, 7); // 'YYYY-MM'
+                
+                if (!groupedByMonth[monthKey]) {
+                    const parts = monthKey.split('-');
+                    const year = parts[0];
+                    const monthIdx = parseInt(parts[1], 10) - 1;
+                    
+                    groupedByMonth[monthKey] = {
+                        label: `${monthNames[monthIdx]} ${year}`,
+                        total: 0,
+                        items: []
+                    };
+                }
+                
+                groupedByMonth[monthKey].items.push(tool);
+                groupedByMonth[monthKey].total += tool.price;
+            });
+
+            grandTotalEl.textContent = formatCurrency(grandTotal);
+            monthsContainer.innerHTML = '';
+
+            const sortedMonthKeys = Object.keys(groupedByMonth).sort().reverse();
+
+            if (sortedMonthKeys.length === 0) {
+                monthsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-industrial-600 gap-4">
+                        <svg class="w-16 h-16 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        <p class="text-sm font-medium">База пуста. Добавьте свои покупки.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Отрисовка каждого месяца
+            sortedMonthKeys.forEach(key => {
+                const group = groupedByMonth[key];
+                // Сортировка инструментов внутри месяца по дате (новые сверху)
+                group.items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                const monthBlock = document.createElement('div');
+                monthBlock.className = 'bg-industrial-900 border border-industrial-700 rounded-lg overflow-hidden';
+                
+                const isOpen = openMonths.has(key);
+                const contentClass = isOpen ? 'accordion-content open' : 'accordion-content';
+                const iconClass = isOpen ? 'accordion-icon open' : 'accordion-icon';
+
+                // Создаем HTML списка инструментов для этого месяца
+                let toolsHtml = '';
+                group.items.forEach(tool => {
+                    toolsHtml += `
+                        <div class="flex justify-between items-center p-3 border-b border-industrial-800 last:border-0 hover:bg-industrial-800/50 transition-colors group">
+                            <div class="flex-1 pr-4">
+                                <h4 class="text-white font-semibold text-sm group-hover:text-industrial-klein transition-colors">${tool.name}</h4>
+                                <span class="text-xs text-industrial-600 font-mono mt-1 block">${formatDateStr(tool.date)}</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="font-mono text-sm font-black text-gray-300">${formatCurrency(tool.price)}</span>
+                                <button onclick="openDeleteModal('${tool.id}', event)" class="text-industrial-600 hover:text-industrial-milwaukee transition-colors p-1" title="Удалить">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                monthBlock.innerHTML = `
+                    <button class="w-full flex justify-between items-center p-4 bg-industrial-800 hover:bg-industrial-700 transition-colors text-left" onclick="toggleMonth('${key}')">
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-white font-bold tracking-wide uppercase">${group.label}</h3>
+                            <span class="bg-industrial-900 text-industrial-600 text-xs px-2 py-0.5 rounded-full border border-industrial-700">${group.items.length} шт</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-mono font-bold text-industrial-klein">${formatCurrency(group.total)}</span>
+                            <svg class="w-5 h-5 text-gray-400 ${iconClass}" id="icon-${key}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </button>
+                    <div class="${contentClass} bg-industrial-900" id="content-${key}">
+                        <div class="p-2">
+                            ${toolsHtml}
+                        </div>
+                    </div>
+                `;
+                monthsContainer.appendChild(monthBlock);
+            });
+        }
+
+        window.toggleMonth = function(key) {
+            const content = document.getElementById(`content-${key}`);
+            const icon = document.getElementById(`icon-${key}`);
+            
+            if (openMonths.has(key)) {
+                openMonths.delete(key);
+                content.classList.remove('open');
+                icon.classList.remove('open');
+            } else {
+                openMonths.add(key);
+                content.classList.add('open');
+                icon.classList.add('open');
+            }
+        };
+
+        window.openDeleteModal = function(id, event) {
+            event.stopPropagation(); // Предотвращаем клик по аккордеону
+            toolToDeleteId = id;
+            modal.classList.remove('hidden');
+        };
+
+        window.closeModal = function() {
+            toolToDeleteId = null;
+            modal.classList.add('hidden');
+        };
+
+        window.confirmDelete = function() {
+            if (toolToDeleteId) {
+                tools = tools.filter(t => t.id !== toolToDeleteId);
+                saveData();
+                closeModal();
+            }
+        };
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = nameInput.value.trim();
+            const price = parseFloat(priceInput.value);
+            const date = dateInput.value;
+
+            if (name && !isNaN(price) && date) {
+                const newTool = {
+                    id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+                    name: name,
+                    price: price,
+                    date: date
+                };
+
+                tools.push(newTool);
+                
+                // Автоматически открываем месяц, в который добавили инструмент
+                const monthKey = date.substring(0, 7);
+                openMonths.add(monthKey);
+                
+                saveData();
+
+                // Очистка полей, оставляем дату
+                nameInput.value = '';
+                priceInput.value = '';
+                nameInput.focus();
+            }
+        });
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            // Устанавливаем текущую дату в инпут
+            const today = new Date();
+            // Смещение для локального часового пояса
+            const offset = today.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
+            
+            dateInput.value = localISOTime;
+            
+            loadData();
+            
+            // Если есть данные, открываем самый свежий месяц по умолчанию
+            if (tools.length > 0) {
+                const latestDate = tools.reduce((latest, tool) => {
+                    return tool.date > latest ? tool.date : latest;
+                }, '2000-01-01');
+                openMonths.add(latestDate.substring(0, 7));
+                renderUI(); // Перерисовываем с открытым месяцем
+            }
+        });
+
+    </script>
+</body>
+</html>
