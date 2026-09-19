@@ -17,7 +17,6 @@
                         cardbg: '#1e1e1e',
                         border: '#2c2c2c',
                         milwaukee: '#da291c',
-                        klein: '#f47920',
                         textmuted: '#888888',
                     },
                     fontFamily: {
@@ -33,42 +32,65 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: theme('colors.mainbg');
+            background-color: #121212;
             color: #ffffff;
             overscroll-behavior-y: none;
             -webkit-tap-highlight-color: transparent;
         }
         
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: theme('colors.mainbg'); 
+            background: #121212; 
         }
         ::-webkit-scrollbar-thumb {
-            background: theme('colors.border'); 
+            background: #2c2c2c; 
             border-radius: 3px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: theme('colors.klein'); 
+            background: #da291c; 
         }
 
+        /* FIX THE INPUT FIELDS AS REQUESTED */
         .input-field {
-            background-color: theme('colors.mainbg');
-            border: 1px solid theme('colors.border');
-            color: white;
-            transition: all 0.2s;
+            background-color: #2c2c2c;
+            color: #ffffff;
+            padding: 14px;
+            border: 1px solid #444444;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 100%;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-sizing: border-box;
+            -webkit-appearance: none; /* Fix for iOS */
         }
+        
+        /* Focus state: Red border */
         .input-field:focus {
             outline: none;
-            border-color: theme('colors.klein');
-            box-shadow: 0 0 0 1px theme('colors.klein');
+            border-color: #da291c;
+            box-shadow: 0 0 0 1px #da291c;
         }
-        ::-webkit-calendar-picker-indicator {
+        
+        /* Fix the date picker icon visibility */
+        input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
             cursor: pointer;
+            opacity: 0.8;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
         }
 
+        /* Placeholder styling for better contrast */
+        ::placeholder {
+            color: #888888;
+            opacity: 1;
+        }
+
+        /* Accordion Logic */
         .accordion-content {
             display: none;
         }
@@ -87,22 +109,16 @@
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Fix for iOS input zoom */
-        input[type="date"], input[type="text"], input[type="number"] {
-            -webkit-appearance: none;
-            font-size: 16px; 
-        }
     </style>
 </head>
 <body class="min-h-screen py-4 px-3 sm:py-6 sm:px-6 lg:px-8 flex justify-center relative">
 
-    <div id="loading-overlay" class="fixed inset-0 bg-mainbg/90 z-[100] flex flex-col items-center justify-center transition-opacity duration-300 backdrop-blur-sm">
-        <svg class="animate-spin h-12 w-12 text-klein mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <div id="loading-overlay" class="fixed inset-0 bg-[#121212]/90 z-[100] flex flex-col items-center justify-center transition-opacity duration-300 backdrop-blur-sm">
+        <svg class="animate-spin h-12 w-12 text-milwaukee mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p class="text-textmuted font-mono text-sm animate-pulse tracking-widest uppercase font-bold">Синхронизация с облаком...</p>
+        <p class="text-[#888888] font-mono text-sm animate-pulse tracking-widest uppercase font-bold">Синхронизация...</p>
     </div>
 
     <div class="w-full max-w-5xl flex flex-col gap-6">
@@ -115,69 +131,69 @@
                 </h1>
                 <p class="text-textmuted mt-1 text-xs font-medium">Telegram Cloud Storage</p>
             </div>
-            <div class="w-full sm:w-auto text-left sm:text-right bg-mainbg p-3 rounded-lg border border-border">
-                <p class="text-[10px] text-textmuted uppercase tracking-wider font-bold mb-1">Всего потрачено</p>
-                <p class="text-xl font-mono font-black text-klein" id="grand-total">$0.00</p>
+            <div class="w-full sm:w-auto text-left sm:text-right bg-mainbg p-3 rounded-lg border border-[#2c2c2c]">
+                <p class="text-[10px] text-textmuted uppercase tracking-wider font-bold mb-1">Всего потрачено (вкл. налог)</p>
+                <p class="text-xl font-mono font-black text-milwaukee" id="grand-total">$0.00</p>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start pb-10">
             
             <div class="lg:col-span-1 lg:sticky lg:top-6">
-                <div class="bg-cardbg p-5 rounded-xl shadow-lg border border-border">
-                    <h2 class="text-sm font-bold uppercase mb-4 border-b border-border pb-3 flex items-center gap-2 text-white">
-                        <svg class="w-4 h-4 text-klein" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <div class="bg-cardbg p-5 rounded-xl shadow-lg border border-[#2c2c2c]">
+                    <h2 class="text-sm font-bold uppercase mb-4 border-b border-[#2c2c2c] pb-3 flex items-center gap-2 text-white">
+                        <svg class="w-4 h-4 text-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Добавить инструмент
                     </h2>
                     
                     <form id="add-tool-form" class="space-y-4">
                         <div>
-                            <label class="block text-[11px] text-textmuted font-bold uppercase tracking-wide mb-1.5" for="tool-name">Название инструмента *</label>
-                            <input type="text" id="tool-name" required placeholder="Например: M18 Fuel Drill" class="w-full px-3 py-2.5 rounded-md input-field text-sm">
+                            <label class="block text-[11px] text-[#888888] font-bold uppercase tracking-wide mb-1.5" for="tool-name">Название инструмента *</label>
+                            <input type="text" id="tool-name" required placeholder="Например: M18 Fuel Drill" class="input-field">
                         </div>
                         
                         <div>
-                            <label class="block text-[11px] text-textmuted font-bold uppercase tracking-wide mb-1.5" for="tool-desc">Описание (опционально)</label>
-                            <input type="text" id="tool-desc" placeholder="Где купил, номер модели..." class="w-full px-3 py-2.5 rounded-md input-field text-sm">
+                            <label class="block text-[11px] text-[#888888] font-bold uppercase tracking-wide mb-1.5" for="tool-desc">Описание (опционально)</label>
+                            <input type="text" id="tool-desc" placeholder="Магазин, серийник..." class="input-field">
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-[11px] text-textmuted font-bold uppercase tracking-wide mb-1.5" for="tool-price">Цена до налога *</label>
+                                <label class="block text-[11px] text-[#888888] font-bold uppercase tracking-wide mb-1.5" for="tool-price">Цена (CAD) *</label>
                                 <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-textmuted text-sm">$</span>
-                                    <input type="number" id="tool-price" required step="0.01" min="0" placeholder="0.00" class="w-full pl-7 pr-3 py-2.5 rounded-md input-field text-sm font-mono font-bold text-white">
+                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#888888] text-sm pointer-events-none">$</span>
+                                    <input type="number" id="tool-price" required step="0.01" min="0" placeholder="0.00" class="input-field pl-8 font-mono font-bold">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-[11px] text-textmuted font-bold uppercase tracking-wide mb-1.5" for="tool-date">Дата *</label>
-                                <input type="date" id="tool-date" required class="w-full px-3 py-2.5 rounded-md input-field text-sm font-mono [color-scheme:dark]">
+                                <label class="block text-[11px] text-[#888888] font-bold uppercase tracking-wide mb-1.5" for="tool-date">Дата покупки *</label>
+                                <input type="date" id="tool-date" required class="input-field font-mono">
                             </div>
                         </div>
                         
-                        <p class="text-[10px] text-klein mt-1 font-mono flex items-center gap-1 bg-klein/10 p-2 rounded border border-klein/20">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            + 5% налог (AB) применится автоматически
+                        <p class="text-[10px] text-[#888888] mt-1 font-mono flex items-center gap-1 bg-[#121212] p-2 rounded border border-[#2c2c2c]">
+                            <svg class="w-3 h-3 text-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            К сумме будет автоматически добавлено 5%
                         </p>
 
-                        <button type="submit" id="submit-btn" class="w-full mt-2 bg-border hover:bg-klein border border-border hover:border-klein text-white font-bold py-3 px-4 rounded-md transition-all duration-200 flex justify-center items-center gap-2 uppercase tracking-wide text-xs shadow-md">
-                            Сохранить
+                        <button type="submit" id="submit-btn" class="w-full mt-2 bg-[#2c2c2c] hover:bg-milwaukee border border-[#444444] hover:border-milwaukee text-white font-bold py-3.5 px-4 rounded-lg transition-all duration-200 flex justify-center items-center gap-2 uppercase tracking-wide text-sm shadow-md">
+                            Сохранить инструмент
                         </button>
                     </form>
                 </div>
             </div>
 
             <div class="lg:col-span-2">
-                <div class="bg-cardbg p-4 sm:p-5 rounded-xl shadow-lg border border-border min-h-[400px]">
-                    <div class="flex justify-between items-center mb-4 border-b border-border pb-3">
+                <div class="bg-cardbg p-4 sm:p-5 rounded-xl shadow-lg border border-[#2c2c2c] min-h-[400px]">
+                    <div class="flex justify-between items-center mb-4 border-b border-[#2c2c2c] pb-3">
                         <h2 class="text-sm font-bold uppercase flex items-center gap-2 text-white">
                             <svg class="w-4 h-4 text-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                            Архив покупок
+                            Архив покупок (по месяцам)
                         </h2>
                     </div>
                     
                     <div id="months-container" class="space-y-3">
-                        <!-- Content dynamically injected here -->
+                        <!-- Dynamic content injected here -->
                     </div>
                 </div>
             </div>
@@ -185,15 +201,15 @@
     </div>
 
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-cardbg border-t-4 border-milwaukee p-6 rounded-xl shadow-2xl max-w-sm w-full">
+        <div class="bg-cardbg border-t-4 border-milwaukee p-6 rounded-xl shadow-2xl max-w-sm w-full border-x border-b border-[#2c2c2c]">
             <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
                 <svg class="w-5 h-5 text-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 Удаление
             </h3>
             <p class="text-textmuted mb-6 text-sm">Удалить этот инструмент из облака? Это действие нельзя отменить.</p>
             <div class="flex justify-end gap-3">
-                <button onclick="closeModal()" class="px-4 py-2 bg-mainbg hover:bg-border text-white rounded-md text-xs font-medium border border-border transition-colors uppercase">Отмена</button>
-                <button id="confirm-delete-btn" onclick="confirmDelete()" class="px-4 py-2 bg-milwaukee hover:bg-red-700 text-white rounded-md text-xs font-bold transition-colors shadow-lg shadow-red-900/50 flex items-center gap-2 uppercase">
+                <button onclick="closeModal()" class="px-4 py-2.5 bg-[#121212] hover:bg-[#2c2c2c] text-white rounded-md text-xs font-medium border border-[#444] transition-colors uppercase">Отмена</button>
+                <button id="confirm-delete-btn" onclick="confirmDelete()" class="px-4 py-2.5 bg-milwaukee hover:bg-red-700 text-white rounded-md text-xs font-bold transition-colors shadow-lg shadow-red-900/50 flex items-center gap-2 uppercase">
                     Удалить
                 </button>
             </div>
@@ -201,17 +217,14 @@
     </div>
 
     <script>
-        // Initialize Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // State Variables
         const STORAGE_KEY = 'voltVaultData';
         let tools = [];
         let openMonths = new Set();
         let toolToDeleteId = null;
 
-        // DOM Elements
         const form = document.getElementById('add-tool-form');
         const nameInput = document.getElementById('tool-name');
         const descInput = document.getElementById('tool-desc');
@@ -230,7 +243,6 @@
             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         ];
 
-        // UI Helpers
         function showLoading() {
             loadingOverlay.classList.remove('hidden');
             loadingOverlay.classList.add('flex');
@@ -268,7 +280,6 @@
                     tools = [];
                 }
                 
-                // Open the most recent month by default if empty
                 if (tools.length > 0 && openMonths.size === 0) {
                     const latestDate = tools.reduce((latest, tool) => {
                         return tool.date > latest ? tool.date : latest;
@@ -295,11 +306,10 @@
             const groupedByMonth = {};
 
             tools.forEach(tool => {
-                // Safeguard against missing finalPrice in legacy corrupted data
                 const actualPrice = tool.finalPrice !== undefined ? tool.finalPrice : (tool.price * 1.05);
                 grandTotal += actualPrice;
                 
-                const monthKey = tool.date.substring(0, 7); // 'YYYY-MM'
+                const monthKey = tool.date.substring(0, 7);
                 
                 if (!groupedByMonth[monthKey]) {
                     const parts = monthKey.split('-');
@@ -324,7 +334,7 @@
 
             if (sortedMonthKeys.length === 0) {
                 monthsContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-10 text-textmuted gap-3 bg-mainbg rounded border border-border border-dashed">
+                    <div class="flex flex-col items-center justify-center py-10 text-textmuted gap-3 bg-mainbg rounded border border-[#2c2c2c] border-dashed">
                         <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
                         <p class="text-xs font-medium uppercase tracking-wider">База пуста</p>
                     </div>
@@ -337,7 +347,7 @@
                 group.items.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 const monthBlock = document.createElement('div');
-                monthBlock.className = 'bg-mainbg border border-border rounded-lg overflow-hidden transition-all';
+                monthBlock.className = 'bg-mainbg border border-[#2c2c2c] rounded-lg overflow-hidden transition-all';
                 
                 const isOpen = openMonths.has(key);
                 const contentClass = isOpen ? 'accordion-content open' : 'accordion-content';
@@ -346,22 +356,22 @@
                 let toolsHtml = '';
                 group.items.forEach(tool => {
                     const actualPrice = tool.finalPrice !== undefined ? tool.finalPrice : (tool.price * 1.05);
-                    const descHtml = tool.desc ? `<p class="text-xs text-textmuted mt-1 leading-tight max-w-[200px] truncate">${tool.desc}</p>` : '';
+                    const descHtml = tool.desc ? `<p class="text-sm text-[#888888] mt-1 leading-snug break-words">${tool.desc}</p>` : '';
                     
                     toolsHtml += `
-                        <div class="flex justify-between items-center p-3 border-b border-cardbg last:border-0 hover:bg-cardbg transition-colors group">
+                        <div class="flex justify-between items-center p-4 border-b border-[#1e1e1e] last:border-0 hover:bg-[#1a1a1a] transition-colors group">
                             <div class="flex-1 pr-3 overflow-hidden">
-                                <h4 class="text-white font-semibold text-sm truncate">${tool.name}</h4>
+                                <h4 class="text-white font-bold text-base truncate">${tool.name}</h4>
                                 ${descHtml}
-                                <span class="text-[10px] text-textmuted font-mono mt-1.5 block">${formatDateStr(tool.date)}</span>
+                                <span class="text-xs text-[#888888] font-mono mt-2 block">${formatDateStr(tool.date)}</span>
                             </div>
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-4">
                                 <div class="text-right">
-                                    <span class="font-mono text-sm font-black text-klein block">${formatCurrency(actualPrice)}</span>
-                                    <span class="text-[9px] text-textmuted uppercase tracking-wide block mt-0.5">вкл. 5%</span>
+                                    <span class="font-mono text-base font-black text-white block">${formatCurrency(actualPrice)}</span>
+                                    <span class="text-[10px] text-milwaukee uppercase tracking-wide block mt-0.5">вкл. 5%</span>
                                 </div>
-                                <button onclick="openDeleteModal('${tool.id}', event)" class="text-border hover:text-milwaukee transition-colors p-1.5 rounded-md hover:bg-cardbg" title="Удалить">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <button onclick="openDeleteModal('${tool.id}', event)" class="text-[#888888] hover:text-milwaukee transition-colors p-2 rounded-md hover:bg-[#2c2c2c]" title="Удалить">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
                         </div>
@@ -369,14 +379,14 @@
                 });
 
                 monthBlock.innerHTML = `
-                    <button class="w-full flex justify-between items-center p-3.5 bg-cardbg hover:bg-[#252525] transition-colors text-left border-l-2 border-transparent hover:border-klein" onclick="toggleMonth('${key}')">
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-white font-bold tracking-wide uppercase text-xs sm:text-sm">${group.label}</h3>
-                            <span class="bg-mainbg text-textmuted text-[10px] px-1.5 py-0.5 rounded border border-border font-mono">${group.items.length}</span>
+                    <button class="w-full flex justify-between items-center p-4 bg-[#1e1e1e] hover:bg-[#252525] transition-colors text-left border-l-2 border-transparent hover:border-milwaukee" onclick="toggleMonth('${key}')">
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-white font-bold tracking-wide uppercase text-sm sm:text-base">${group.label}</h3>
+                            <span class="bg-[#121212] text-[#888888] text-xs px-2 py-0.5 rounded border border-[#2c2c2c] font-mono">${group.items.length}</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="font-mono font-bold text-white text-sm">${formatCurrency(group.total)}</span>
-                            <svg class="w-4 h-4 text-textmuted ${iconClass}" id="icon-${key}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <span class="font-mono font-bold text-white text-base">${formatCurrency(group.total)}</span>
+                            <svg class="w-5 h-5 text-[#888888] ${iconClass}" id="icon-${key}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </button>
                     <div class="${contentClass}" id="content-${key}">
@@ -420,7 +430,7 @@
         window.confirmDelete = function() {
             if (toolToDeleteId) {
                 const originalText = confirmDeleteBtn.innerHTML;
-                confirmDeleteBtn.innerHTML = '<svg class="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+                confirmDeleteBtn.innerHTML = '<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
                 confirmDeleteBtn.disabled = true;
 
                 tools = tools.filter(t => t.id !== toolToDeleteId);
@@ -444,9 +454,9 @@
 
             if (name && !isNaN(price) && date) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+                submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
-                const finalPrice = price * 1.05;
+                const finalPrice = price * 1.05; // ADD EXACTLY 5% TAX
 
                 const newTool = {
                     id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
@@ -468,7 +478,7 @@
                     priceInput.value = '';
                     
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Сохранить';
+                    submitBtn.innerHTML = 'Сохранить инструмент';
                     
                     try { tg.HapticFeedback.notificationOccurred('success'); } catch(e){}
                     
@@ -479,10 +489,10 @@
             }
         });
 
-        // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
             try { tg.ready(); } catch(e) {}
 
+            // Set default date to local today
             const today = new Date();
             const offset = today.getTimezoneOffset() * 60000;
             const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
