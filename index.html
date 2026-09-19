@@ -2,10 +2,13 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Учет Инструментов - Мой Арсенал</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Учет Инструментов - Telegram Арсенал</title>
     
+    <!-- Подключаем Telegram Web App API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -27,6 +30,7 @@
                     animation: {
                         'fade-in': 'fadeIn 0.2s ease-out',
                         'slide-down': 'slideDown 0.3s ease-out forwards',
+                        'spin-slow': 'spin 2s linear infinite',
                     },
                     keyframes: {
                         fadeIn: {
@@ -47,19 +51,21 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #f3f4f6;
+            background-color: var(--tg-theme-bg-color, #0a0a0a);
+            color: var(--tg-theme-text-color, #f3f4f6);
+            /* Предотвращаем pull-to-refresh на мобилках */
+            overscroll-behavior-y: none;
         }
         /* Брутальный скроллбар */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #141414; 
         }
         ::-webkit-scrollbar-thumb {
             background: #262626; 
-            border-radius: 4px;
+            border-radius: 3px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #f97316; 
@@ -96,50 +102,64 @@
         .accordion-icon.open {
             transform: rotate(180deg);
         }
+        
+        /* Фикс для iOS инпутов */
+        input[type="date"], input[type="text"], input[type="number"] {
+            -webkit-appearance: none;
+        }
     </style>
 </head>
-<body class="min-h-screen py-6 px-4 sm:px-6 lg:px-8 flex justify-center relative">
+<body class="min-h-screen py-4 px-3 sm:py-6 sm:px-6 lg:px-8 flex justify-center relative bg-industrial-900">
+
+    <!-- Экран загрузки для Cloud Storage -->
+    <div id="loading-overlay" class="fixed inset-0 bg-industrial-900/95 z-[100] flex flex-col items-center justify-center transition-opacity duration-300">
+        <svg class="animate-spin h-12 w-12 text-industrial-klein mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-industrial-600 font-mono text-sm animate-pulse tracking-widest uppercase font-bold">Синхронизация TG Cloud...</p>
+    </div>
 
     <div class="w-full max-w-5xl flex flex-col gap-6">
         
         <!-- Шапка -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-industrial-800 p-6 rounded-xl border-l-4 border-industrial-milwaukee shadow-xl gap-4">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-industrial-800 p-5 rounded-xl border-l-4 border-industrial-milwaukee shadow-xl gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-white tracking-tight uppercase flex items-center gap-3">
-                    <svg class="w-8 h-8 text-industrial-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Мой Арсенал
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase flex items-center gap-3">
+                    <svg class="w-7 h-7 text-industrial-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span id="header-title-text">Мой Арсенал</span>
                 </h1>
-                <p class="text-industrial-600 mt-1 text-sm font-medium">Ежемесячный учет покупок</p>
+                <p class="text-industrial-600 mt-1 text-xs sm:text-sm font-medium">Синхронизировано через Telegram</p>
             </div>
-            <div class="text-left sm:text-right bg-industrial-900 p-3 rounded-lg border border-industrial-700">
+            <div class="w-full sm:w-auto text-left sm:text-right bg-industrial-900 p-3 rounded-lg border border-industrial-700">
                 <p class="text-xs text-industrial-600 uppercase tracking-wider font-bold mb-1">Всего за все время</p>
-                <p class="text-2xl font-mono font-black text-white" id="grand-total">0.00 CAD</p>
+                <p class="text-xl sm:text-2xl font-mono font-black text-white" id="grand-total">0.00 CAD</p>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start pb-10">
             
             <!-- Левая колонка: Форма -->
-            <div class="lg:col-span-1 sticky top-6">
-                <div class="bg-industrial-800 p-6 rounded-xl shadow-lg border border-industrial-700">
-                    <h2 class="text-lg font-bold uppercase mb-5 border-b border-industrial-700 pb-3 flex items-center gap-2 text-white">
+            <div class="lg:col-span-1 lg:sticky lg:top-6">
+                <div class="bg-industrial-800 p-5 sm:p-6 rounded-xl shadow-lg border border-industrial-700">
+                    <h2 class="text-lg font-bold uppercase mb-4 border-b border-industrial-700 pb-3 flex items-center gap-2 text-white">
                         <svg class="w-5 h-5 text-industrial-klein" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Новая покупка
                     </h2>
                     <form id="add-tool-form" class="space-y-4">
                         <div>
                             <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-name">Название инструмента</label>
-                            <input type="text" id="tool-name" required placeholder="Например: Стриппер Klein" class="w-full px-3 py-2.5 rounded-md input-field text-sm">
+                            <input type="text" id="tool-name" required placeholder="Например: Стриппер Klein" class="w-full px-3 py-3 sm:py-2.5 rounded-md input-field text-sm">
                         </div>
                         <div>
                             <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-price">Цена (CAD)</label>
-                            <input type="number" id="tool-price" required step="0.01" min="0" placeholder="0.00" class="w-full px-3 py-2.5 rounded-md input-field text-sm font-mono font-bold text-industrial-klein">
+                            <input type="number" id="tool-price" required step="0.01" min="0" placeholder="0.00" class="w-full px-3 py-3 sm:py-2.5 rounded-md input-field text-sm font-mono font-bold text-industrial-klein">
                         </div>
                         <div>
                             <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-date">Дата покупки</label>
-                            <input type="date" id="tool-date" required class="w-full px-3 py-2.5 rounded-md input-field text-sm font-mono [color-scheme:dark]">
+                            <input type="date" id="tool-date" required class="w-full px-3 py-3 sm:py-2.5 rounded-md input-field text-sm font-mono [color-scheme:dark]">
                         </div>
-                        <button type="submit" class="w-full mt-6 bg-industrial-700 hover:bg-industrial-klein hover:border-industrial-klein border border-industrial-600 text-white font-bold py-3 px-4 rounded-md transition-all duration-200 flex justify-center items-center gap-2 uppercase tracking-wide text-sm shadow-md">
+                        <button type="submit" id="submit-btn" class="w-full mt-6 bg-industrial-700 hover:bg-industrial-klein border border-industrial-600 text-white font-bold py-3.5 sm:py-3 px-4 rounded-md transition-all duration-200 flex justify-center items-center gap-2 uppercase tracking-wide text-sm shadow-md">
                             Внести в базу
                         </button>
                     </form>
@@ -148,7 +168,7 @@
 
             <!-- Правая колонка: Месяцы (Аккордеон) -->
             <div class="lg:col-span-2">
-                <div class="bg-industrial-800 p-6 rounded-xl shadow-lg border border-industrial-700 min-h-[500px]">
+                <div class="bg-industrial-800 p-4 sm:p-6 rounded-xl shadow-lg border border-industrial-700 min-h-[400px]">
                     <div class="flex justify-between items-center mb-5 border-b border-industrial-700 pb-3">
                         <h2 class="text-lg font-bold uppercase flex items-center gap-2 text-white">
                             <svg class="w-5 h-5 text-industrial-milwaukee" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -174,13 +194,26 @@
             <p class="text-gray-300 mb-6 text-sm">Вы действительно хотите удалить этот инструмент из базы? Это действие нельзя отменить.</p>
             <div class="flex justify-end gap-3">
                 <button onclick="closeModal()" class="px-4 py-2 bg-industrial-900 hover:bg-industrial-700 text-white rounded-md text-sm font-medium border border-industrial-700 transition-colors">Отмена</button>
-                <button onclick="confirmDelete()" class="px-4 py-2 bg-industrial-milwaukee hover:bg-red-700 text-white rounded-md text-sm font-bold transition-colors shadow-lg shadow-red-900/50">Удалить</button>
+                <button id="confirm-delete-btn" onclick="confirmDelete()" class="px-4 py-2 bg-industrial-milwaukee hover:bg-red-700 text-white rounded-md text-sm font-bold transition-colors shadow-lg shadow-red-900/50 flex items-center gap-2">
+                    Удалить
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        const STORAGE_KEY = 'voltvault_tools_local';
+        const tg = window.Telegram.WebApp;
+        
+        // Расширяем Mini App на весь экран
+        tg.expand();
+        
+        // Персонализация заголовка
+        const user = tg.initDataUnsafe?.user;
+        if (user && user.first_name) {
+            document.getElementById('header-title-text').textContent = `Арсенал ${user.first_name}`;
+        }
+
+        const STORAGE_KEY = 'voltvault_tools_cloud';
         let tools = [];
         let openMonths = new Set(); // Хранит ключи открытых месяцев (например '2026-09')
         let toolToDeleteId = null;
@@ -189,36 +222,71 @@
         const nameInput = document.getElementById('tool-name');
         const priceInput = document.getElementById('tool-price');
         const dateInput = document.getElementById('tool-date');
+        const submitBtn = document.getElementById('submit-btn');
         
         const monthsContainer = document.getElementById('months-container');
         const grandTotalEl = document.getElementById('grand-total');
         const modal = document.getElementById('delete-modal');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 
         const monthNames = [
             "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", 
             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         ];
 
-        // Загрузка данных
-        function loadData() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try {
-                    tools = JSON.parse(saved);
-                } catch (e) {
-                    console.error("Ошибка парсинга данных", e);
-                    tools = [];
-                }
-            } else {
-                tools = [];
-            }
-            renderUI();
+        function showLoading() {
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
         }
 
-        // Сохранение данных
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(tools));
-            renderUI();
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+            loadingOverlay.classList.remove('flex');
+        }
+
+        // Загрузка данных из Telegram Cloud
+        function loadData() {
+            showLoading();
+            tg.CloudStorage.getItem(STORAGE_KEY, (err, saved) => {
+                if (err) {
+                    console.error("Ошибка загрузки из TG Cloud:", err);
+                    tools = [];
+                } else if (saved) {
+                    try {
+                        tools = JSON.parse(saved);
+                    } catch (e) {
+                        console.error("Ошибка парсинга данных:", e);
+                        tools = [];
+                    }
+                } else {
+                    tools = [];
+                }
+                
+                // Если есть данные, открываем самый свежий месяц по умолчанию
+                if (tools.length > 0 && openMonths.size === 0) {
+                    const latestDate = tools.reduce((latest, tool) => {
+                        return tool.date > latest ? tool.date : latest;
+                    }, '2000-01-01');
+                    openMonths.add(latestDate.substring(0, 7));
+                }
+                
+                renderUI();
+                hideLoading();
+            });
+        }
+
+        // Сохранение данных в Telegram Cloud
+        function saveData(callback) {
+            const dataString = JSON.stringify(tools);
+            tg.CloudStorage.setItem(STORAGE_KEY, dataString, (err, success) => {
+                if (err) {
+                    console.error("Ошибка сохранения в TG Cloud:", err);
+                    // В реальном приложении можно показать тост с ошибкой
+                }
+                renderUI();
+                if (callback) callback();
+            });
         }
 
         function formatCurrency(amount) {
@@ -282,7 +350,7 @@
                 group.items.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 const monthBlock = document.createElement('div');
-                monthBlock.className = 'bg-industrial-900 border border-industrial-700 rounded-lg overflow-hidden';
+                monthBlock.className = 'bg-industrial-900 border border-industrial-700 rounded-lg overflow-hidden transition-all';
                 
                 const isOpen = openMonths.has(key);
                 const contentClass = isOpen ? 'accordion-content open' : 'accordion-content';
@@ -292,15 +360,15 @@
                 let toolsHtml = '';
                 group.items.forEach(tool => {
                     toolsHtml += `
-                        <div class="flex justify-between items-center p-3 border-b border-industrial-800 last:border-0 hover:bg-industrial-800/50 transition-colors group">
+                        <div class="flex justify-between items-center p-3 sm:p-4 border-b border-industrial-800 last:border-0 hover:bg-industrial-800/50 transition-colors group">
                             <div class="flex-1 pr-4">
-                                <h4 class="text-white font-semibold text-sm group-hover:text-industrial-klein transition-colors">${tool.name}</h4>
+                                <h4 class="text-white font-semibold text-sm sm:text-base group-hover:text-industrial-klein transition-colors">${tool.name}</h4>
                                 <span class="text-xs text-industrial-600 font-mono mt-1 block">${formatDateStr(tool.date)}</span>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <span class="font-mono text-sm font-black text-gray-300">${formatCurrency(tool.price)}</span>
+                            <div class="flex items-center gap-3 sm:gap-4">
+                                <span class="font-mono text-sm sm:text-base font-black text-gray-300">${formatCurrency(tool.price)}</span>
                                 <button onclick="openDeleteModal('${tool.id}', event)" class="text-industrial-600 hover:text-industrial-milwaukee transition-colors p-1" title="Удалить">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
                         </div>
@@ -310,16 +378,16 @@
                 monthBlock.innerHTML = `
                     <button class="w-full flex justify-between items-center p-4 bg-industrial-800 hover:bg-industrial-700 transition-colors text-left" onclick="toggleMonth('${key}')">
                         <div class="flex items-center gap-3">
-                            <h3 class="text-white font-bold tracking-wide uppercase">${group.label}</h3>
+                            <h3 class="text-white font-bold tracking-wide uppercase text-sm sm:text-base">${group.label}</h3>
                             <span class="bg-industrial-900 text-industrial-600 text-xs px-2 py-0.5 rounded-full border border-industrial-700">${group.items.length} шт</span>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <span class="font-mono font-bold text-industrial-klein">${formatCurrency(group.total)}</span>
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="font-mono font-bold text-industrial-klein text-sm sm:text-base">${formatCurrency(group.total)}</span>
                             <svg class="w-5 h-5 text-gray-400 ${iconClass}" id="icon-${key}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </button>
                     <div class="${contentClass} bg-industrial-900" id="content-${key}">
-                        <div class="p-2">
+                        <div class="p-1 sm:p-2">
                             ${toolsHtml}
                         </div>
                     </div>
@@ -340,6 +408,8 @@
                 openMonths.add(key);
                 content.classList.add('open');
                 icon.classList.add('open');
+                // Даем фидбэк при открытии (Haptic Feedback TG)
+                tg.HapticFeedback.impactOccurred('light');
             }
         };
 
@@ -347,6 +417,7 @@
             event.stopPropagation(); // Предотвращаем клик по аккордеону
             toolToDeleteId = id;
             modal.classList.remove('hidden');
+            tg.HapticFeedback.notificationOccurred('warning');
         };
 
         window.closeModal = function() {
@@ -356,9 +427,19 @@
 
         window.confirmDelete = function() {
             if (toolToDeleteId) {
+                // Показываем индикатор на кнопке
+                const originalText = confirmDeleteBtn.innerHTML;
+                confirmDeleteBtn.innerHTML = '<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Ждите...';
+                confirmDeleteBtn.disabled = true;
+
                 tools = tools.filter(t => t.id !== toolToDeleteId);
-                saveData();
-                closeModal();
+                
+                saveData(() => {
+                    closeModal();
+                    confirmDeleteBtn.innerHTML = originalText;
+                    confirmDeleteBtn.disabled = false;
+                    tg.HapticFeedback.notificationOccurred('success');
+                });
             }
         };
 
@@ -370,6 +451,10 @@
             const date = dateInput.value;
 
             if (name && !isNaN(price) && date) {
+                // Блокируем кнопку формы
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Сохранение...';
+
                 const newTool = {
                     id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
                     name: name,
@@ -383,35 +468,38 @@
                 const monthKey = date.substring(0, 7);
                 openMonths.add(monthKey);
                 
-                saveData();
-
-                // Очистка полей, оставляем дату
-                nameInput.value = '';
-                priceInput.value = '';
-                nameInput.focus();
+                saveData(() => {
+                    // Очистка полей
+                    nameInput.value = '';
+                    priceInput.value = '';
+                    
+                    // Возвращаем кнопку в исходное состояние
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Внести в базу';
+                    
+                    tg.HapticFeedback.notificationOccurred('success');
+                    
+                    // Скрываем клавиатуру на мобилках
+                    nameInput.blur();
+                    priceInput.blur();
+                });
             }
         });
 
         // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', () => {
+            // Сообщаем TG, что мы готовы
+            tg.ready();
+
             // Устанавливаем текущую дату в инпут
             const today = new Date();
-            // Смещение для локального часового пояса
             const offset = today.getTimezoneOffset() * 60000;
             const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
             
             dateInput.value = localISOTime;
             
+            // Начинаем загрузку из облака TG
             loadData();
-            
-            // Если есть данные, открываем самый свежий месяц по умолчанию
-            if (tools.length > 0) {
-                const latestDate = tools.reduce((latest, tool) => {
-                    return tool.date > latest ? tool.date : latest;
-                }, '2000-01-01');
-                openMonths.add(latestDate.substring(0, 7));
-                renderUI(); // Перерисовываем с открытым месяцем
-            }
         });
 
     </script>
