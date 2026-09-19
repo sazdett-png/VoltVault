@@ -148,12 +148,9 @@
                     </h2>
                     <form id="add-tool-form" class="space-y-4">
                         <div>
-                            <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-name">Название инструмента</label>
-                            <input type="text" id="tool-name" required placeholder="Например: Стриппер Klein" class="w-full px-3 py-3 sm:py-2.5 rounded-md input-field text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-price">Цена (CAD)</label>
+                            <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-price">Цена без налога (CAD)</label>
                             <input type="number" id="tool-price" required step="0.01" min="0" placeholder="0.00" class="w-full px-3 py-3 sm:py-2.5 rounded-md input-field text-sm font-mono font-bold text-industrial-klein">
+                            <p class="text-[10px] text-industrial-600 mt-1.5 font-mono">+ 5% налог (AB) будет добавлен автоматически</p>
                         </div>
                         <div>
                             <label class="block text-xs text-industrial-600 font-bold uppercase tracking-wide mb-1" for="tool-date">Дата покупки</label>
@@ -366,7 +363,10 @@
                                 <span class="text-xs text-industrial-600 font-mono mt-1 block">${formatDateStr(tool.date)}</span>
                             </div>
                             <div class="flex items-center gap-3 sm:gap-4">
-                                <span class="font-mono text-sm sm:text-base font-black text-gray-300">${formatCurrency(tool.price)}</span>
+                                <div class="text-right">
+                                    <span class="font-mono text-sm sm:text-base font-black text-gray-300 block">${formatCurrency(tool.price)}</span>
+                                    <span class="text-[10px] text-industrial-600 font-mono block mt-0.5">вкл. 5% налог</span>
+                                </div>
                                 <button onclick="openDeleteModal('${tool.id}', event)" class="text-industrial-600 hover:text-industrial-milwaukee transition-colors p-1" title="Удалить">
                                     <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
@@ -447,18 +447,22 @@
             e.preventDefault();
             
             const name = nameInput.value.trim();
-            const price = parseFloat(priceInput.value);
+            const basePrice = parseFloat(priceInput.value);
             const date = dateInput.value;
 
-            if (name && !isNaN(price) && date) {
+            if (name && !isNaN(basePrice) && date) {
                 // Блокируем кнопку формы
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Сохранение...';
 
+                // Добавляем 5% налог Альберты
+                const finalPrice = basePrice * 1.05;
+
                 const newTool = {
                     id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
                     name: name,
-                    price: price,
+                    price: finalPrice, // Сохраняем цену с уже включенным налогом
+                    basePrice: basePrice, // Сохраняем исходную цену на всякий случай
                     date: date
                 };
 
